@@ -1,6 +1,13 @@
 # Docker Compose moderno - No se requiere el campo 'version'
 
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: libros_db
+    environment:
+      - POSTGRES_USER=libros_user
+      - POSTGRES_PASSWORD=libros_pass
+      - POSTGRES_DB=libros_db
   # TODO: Definir servicio de aplicación FastAPI
   # app:
   #   build:
@@ -35,12 +42,12 @@ services:
   #     timeout: 5s
   #     retries: 5
 
-# TODO: Definir red personalizada
-# networks:
-#   app-network:
-#     driver: bridge
+  # TODO: Definir red personalizada
+  # networks:
+  #   app-network:
+  #     driver: bridge
 
-# TODO: Definir volumen con nombre personalizado
-# volumes:
-#   db_data:
-#     name: my_database_volume
+  # TODO: Definir volumen con nombre personalizado
+  # volumes:
+  #   db_data:
+  #     name: my_database_volume
