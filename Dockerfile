@@ -1,11 +1,13 @@
-# TODO: Crear Dockerfile para la aplicación FastAPI
-# FROM python:3.11-slim
+#  Crear Dockerfile para la aplicación FastAPI
 
-# TODO: Crear usuario no-root para seguridad
-# RUN useradd -m -u 1000 appuser
 
-# TODO: Establecer directorio de trabajo
-# WORKDIR /app
+FROM python:3.11-slim
+
+# Crea el usuario appuser, su carpeta personal y le asigna el UID 1000
+RUN useradd -m -u 1000 appuser    
+
+# Establecer directorio de trabajo
+WORKDIR /app                       
 
 # TODO: Instalar dependencias del sistema necesarias (gcc, postgresql-client)
 # RUN apt-get update && apt-get install -y ...
