@@ -26,6 +26,13 @@ services:
     container_name: libros_api
     ports:
       - "8080:8080"
+
+    environment:
+      DATABASE_URL: postgresql://libros_user:libros_pass@db:5432/libros_db
+
+    depends_on:
+      db: { "condition": "service_healthy" }
+
     networks:
       - libros_net
 
