@@ -12,9 +12,11 @@ WORKDIR /app
 # TODO: Instalar dependencias del sistema necesarias (gcc, postgresql-client)
 # RUN apt-get update && apt-get install -y ...
 
-# TODO: Copiar requirements.txt e instalar dependencias Python
-# COPY requirements.txt .
-# RUN pip install --no-cache-dir -r requirements.txt
+# copiamos el archivo dependencias
+COPY requirements.txt .
+
+#Instala dependencias python
+RUN pip install --no-cache-dir -r requirements.txt
 
 # TODO: Copiar código de la aplicación
 # COPY . .
