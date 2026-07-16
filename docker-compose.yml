@@ -12,6 +12,13 @@ services:
       - libros_data:/var/lib/postgresql/data # monta el volumen con nombre en la ruta real de Postgres
     networks:
       - libros_net
+    # Comprueba que Postgres ya acepta conexiones antes de considerarlo "listo",
+    # así la API no intenta conectarse mientras la base de datos sigue inicializando
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U libros_user -d libros_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   # Red propia: permite que los contenedores se llamen por nombre (DNS interno)
