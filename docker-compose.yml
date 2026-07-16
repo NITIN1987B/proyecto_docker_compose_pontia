@@ -1,5 +1,4 @@
 # Docker Compose moderno - No se requiere el campo 'version'
-
 services:
   # Base de datos PostgreSQL - contenedor persistente con volumen propio
   db:
@@ -9,54 +8,17 @@ services:
       - POSTGRES_USER=libros_user
       - POSTGRES_PASSWORD=libros_pass
       - POSTGRES_DB=libros_db
+    volumes:
+      - libros_data:/var/lib/postgresql/data # monta el volumen con nombre en la ruta real de Postgres
     networks:
-      # metemos a db dentro de nuestra red propia
       - libros_net
 
 networks:
-  # declaramos la red aquí, a nivel raíz del archivo
+  # Red propia: permite que los contenedores se llamen por nombre (DNS interno)
   libros_net:
-    driver: bridge # bridge = red viertual aislada dentro de mi máquina 
-  # TODO: Definir servicio de aplicación FastAPI
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #     - DATABASE_URL=postgresql://user:password@db:5432/mydb
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #   networks:
-  #     - app-network
-  #   restart: unless-stopped
+    driver: bridge
 
-  # TODO: Definir servicio de base de datos
-  # db:
-  #   image: postgres:16-alpine
-  #   environment:
-  #     - POSTGRES_USER=user
-  #     - POSTGRES_PASSWORD=password
-  #     - POSTGRES_DB=mydb
-  #   volumes:
-  #     - db_data:/var/lib/postgresql/data
-  #   networks:
-  #     - app-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U user"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-
-  # TODO: Definir red personalizada
-  # networks:
-  #   app-network:
-  #     driver: bridge
-
-  # TODO: Definir volumen con nombre personalizado
-  # volumes:
-  #   db_data:
-  #     name: my_database_volume
+volumes:
+  # Volumen con nombre: persiste los datos aunque se borre el contenedor
+  libros_data:
+    name: libros_data_volume
