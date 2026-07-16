@@ -1,51 +1,136 @@
-from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel, Field
-from typing import List
 import logging
+import os
 
-# TODO: Configurar logging
-# logging.basicConfig(...)
+from fastapi import Depends, FastAPI, HTTPException, status
+from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-# TODO: Configurar conexión a base de datos
-# from sqlalchemy import create_engine, Column, Integer, String
-# from sqlalchemy.ext.declarative import declarative_base
-# from sqlalchemy.orm import sessionmaker
 
-app = FastAPI(title="CRUD API", version="1.0.0")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# TODO: Definir modelos Pydantic
-# class EstudianteCreate(BaseModel):
-#     nombre: str
-#     email: str
-#     edad: int
 
-# class EstudianteResponse(BaseModel):
-#     id: int
-#     nombre: str
-#     email: str
-#     edad: int
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# TODO: Implementar endpoints CRUD
-# @app.get("/estudiantes", response_model=List[EstudianteResponse])
-# def listar_estudiantes():
-#     """Lista todas las entidades"""
-#     pass
+engine = create_engine(DATABASE_URL)
 
-# @app.get("/estudiantes/{estudiante_id}", response_model=EstudianteResponse)
-# def obtener_estudiante(estudiante_id: int):
-#     """Recupera una entidad específica"""
-#     pass
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
 
-# @app.post("/estudiantes", response_model=EstudianteResponse, status_code=status.HTTP_201_CREATED)
-# def crear_estudiante(estudiante: EstudianteCreate):
-#     """Crea una nueva entidad"""
-#     pass
+Base = declarative_base()
 
-# @app.delete("/estudiantes/{estudiante_id}", status_code=status.HTTP_204_NO_CONTENT)
-# def eliminar_estudiante(estudiante_id: int):
-#     """Borra una entidad"""
-#     pass
+
+# Tabla libros de PostgreSQL
+class Libro(Base):
+    __tablename__ = "libros"
+
+    id = Column(Integer, primary_key=True, index=True)
+    titulo = Column(String, nullable=False)
+    autor = Column(String, nullable=False)
+    anio = Column(Integer, nullable=False)
+
+
+# Datos necesarios para crear un libro
+class LibroCreate(BaseModel):
+    titulo: str = Field(min_length=1)
+    autor: str = Field(min_length=1)
+    anio: int
+
+
+# Datos que devuelve la API
+class LibroResponse(LibroCreate):
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="CRUD de libros", version="1.0.0")
+
+
+# Abre y cierra la conexión con la base de datos
+def get_db():
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 @app.get("/")
 def root():
-    return {"message": "CRUD API"}
+    return {"message": "API de libros funcionando"}
+
+
+@app.get("/libros", response_model=list[LibroResponse])
+def listar_libros(db: Session = Depends(get_db)):
+    libros = db.query(Libro).all()
+
+    logger.info("Se ha consultado la lista de libros")
+
+    return libros
+
+
+@app.get("/libros/{libro_id}", response_model=LibroResponse)
+def obtener_libro(libro_id: int, db: Session = Depends(get_db)):
+    libro = db.query(Libro).filter(Libro.id == libro_id).first()
+
+    if libro is None:
+        logger.warning("Libro no encontrado: %s", libro_id)
+
+        raise HTTPException(
+            status_code=404,
+            detail="Libro no encontrado",
+        )
+
+    logger.info("Se ha consultado el libro %s", libro_id)
+
+    return libro
+
+
+@app.post(
+    "/libros",
+    response_model=LibroResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def crear_libro(libro: LibroCreate, db: Session = Depends(get_db)):
+    nuevo_libro = Libro(
+        titulo=libro.titulo,
+        autor=libro.autor,
+        anio=libro.anio,
+    )
+
+    db.add(nuevo_libro)
+    db.commit()
+    db.refresh(nuevo_libro)
+
+    logger.info("Se ha creado el libro %s", nuevo_libro.id)
+
+    return nuevo_libro
+
+
+@app.delete(
+    "/libros/{libro_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def eliminar_libro(libro_id: int, db: Session = Depends(get_db)):
+    libro = db.query(Libro).filter(Libro.id == libro_id).first()
+
+    if libro is None:
+        logger.warning("Libro no encontrado: %s", libro_id)
+
+        raise HTTPException(
+            status_code=404,
+            detail="Libro no encontrado",
+        )
+
+    db.delete(libro)
+    db.commit()
+
+    logger.info("Se ha eliminado el libro %s", libro_id)
