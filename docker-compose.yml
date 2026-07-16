@@ -20,6 +20,15 @@ services:
       timeout: 5s
       retries: 5
 
+  # Aplicación FastAPI
+  app:
+    build: .
+    container_name: libros_api
+    ports:
+      - "8080:8080"
+    networks:
+      - libros_net
+
 networks:
   # Red propia: permite que los contenedores se llamen por nombre (DNS interno)
   libros_net:
