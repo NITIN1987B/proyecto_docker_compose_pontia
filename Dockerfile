@@ -9,8 +9,6 @@ RUN useradd -m -u 1000 appuser
 # Establecer directorio de trabajo
 WORKDIR /app                       
 
-# TODO: Instalar dependencias del sistema necesarias (gcc, postgresql-client)
-# RUN apt-get update && apt-get install -y ...
 
 # copiamos el archivo dependencias
 COPY requirements.txt .
@@ -26,8 +24,8 @@ RUN chown -R appuser:appuser /app
 # activamos appuser para las siguientes instrucciones
 USER appuser
 
-# TODO: Exponer puerto 8080
-# EXPOSE 8080
+#  informa de que fastApi escucha en el puerto 8080
+EXPOSE 8080
 
-# TODO: Ejecutar aplicación con uvicorn
-# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+# arranca la app
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
