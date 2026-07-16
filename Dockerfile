@@ -14,12 +14,11 @@ WORKDIR /app
 
 # copiamos el archivo dependencias
 COPY requirements.txt .
-
 #Instala dependencias python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# TODO: Copiar código de la aplicación
-# COPY . .
+#  Copia el proyecto dentro de /app
+COPY . .
 
 # TODO: Cambiar ownership y usuario
 # RUN chown -R appuser:appuser /app
