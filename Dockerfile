@@ -20,9 +20,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 #  Copia el proyecto dentro de /app
 COPY . .
 
-# TODO: Cambiar ownership y usuario
-# RUN chown -R appuser:appuser /app
-# USER appuser
+# da al usuario appuser la propiedad de los archivos de /app
+RUN chown -R appuser:appuser /app
+
+# activamos appuser para las siguientes instrucciones
+USER appuser
 
 # TODO: Exponer puerto 8080
 # EXPOSE 8080
