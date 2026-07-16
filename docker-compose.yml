@@ -1,6 +1,7 @@
 # Docker Compose moderno - No se requiere el campo 'version'
 
 services:
+  # Base de datos PostgreSQL - contenedor persistente con volumen propio
   db:
     image: postgres:16-alpine
     container_name: libros_db
@@ -8,6 +9,14 @@ services:
       - POSTGRES_USER=libros_user
       - POSTGRES_PASSWORD=libros_pass
       - POSTGRES_DB=libros_db
+    networks:
+      # metemos a db dentro de nuestra red propia
+      - libros_net
+
+networks:
+  # declaramos la red aquí, a nivel raíz del archivo
+  libros_net:
+    driver: bridge # bridge = red viertual aislada dentro de mi máquina 
   # TODO: Definir servicio de aplicación FastAPI
   # app:
   #   build:
